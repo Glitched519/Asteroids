@@ -3,8 +3,7 @@ import java.applet.AudioClip;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.Timer;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 public class Asteroids extends Applet implements KeyListener, ActionListener
 {
@@ -24,9 +23,9 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
     int scrWidth = screenSize.width;
     float red, green, blue;
     Color flashyLights;
-   
+    
     @Override
-     public void init()
+    public void init()
     {
         this.setSize(scrWidth, scrHeight);
         this.addKeyListener(this);
@@ -49,8 +48,7 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
         shipHit = getAudioClip(getCodeBase(), "explode1.wav");
         asteroidHit = getAudioClip(getCodeBase(), "explode0.wav");
         backgroundMusic = getAudioClip(getCodeBase(), "Trap_Music.wav");
-        
-        backgroundMusic.loop();
+        backgroundMusic.loop();       
         
     }
       
@@ -387,7 +385,7 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
                 spaceKey = false;
         }
     }
-    
+
     @Override
     public void keyTyped(KeyEvent e) {}
 }
