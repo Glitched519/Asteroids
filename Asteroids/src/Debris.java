@@ -1,8 +1,5 @@
 import java.awt.Polygon;
-/**
- * Java Retro Asteroids - Lesson 11
- * @author Adrian Balogh
- */
+
 public class Debris extends VectorSprite
 {
     

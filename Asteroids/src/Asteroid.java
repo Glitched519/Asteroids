@@ -1,13 +1,10 @@
 import java.awt.Polygon;
-/**
- * Java Retro Asteroids - Lesson 11
- * @author Adrian Balogh
- */
-public class Asteroid extends VectorSprite 
+
+public final class Asteroid extends VectorSprite 
 {
     int size;
-    
-    
+    Asteroids main = new Asteroids();
+        
     public Asteroid()
     {
         size = 3;
@@ -48,15 +45,15 @@ public class Asteroid extends VectorSprite
         
         h = Math.random() * 400 + 100;
         a = Math.random()* 2*Math.PI;
-        xposition = Math.cos(a)*h + 450;
-        yposition = Math.sin(a)*h + 300;
+        xposition = Math.cos(a)*h + main.scrWidth/2;
+        yposition = Math.sin(a)*h + main.scrHeight/2;
         
         ROTATION = (Math.random() / 2 - 0.25) / size;
         
         active = true;
     }
     
-    
+    @Override
     public void updatePosition()
     {
         angle += ROTATION;

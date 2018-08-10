@@ -1,22 +1,12 @@
 import java.awt.*;
-/**
- * Java Retro Asteroids - Lesson 11
- * @author Adrian Balogh
- */
+
 public class VectorSprite
 {
-    
-    double xposition;
-    double yposition;
-    double xspeed;
-    double yspeed;
-    double angle;
-    Polygon shape, drawShape;
-    double ROTATION;
-    double THRUST;
+    Asteroids main = new Asteroids();
+    double xposition, yposition, xspeed, yspeed, angle, ROTATION, THRUST;
     boolean active;
     int counter;
-    
+    Polygon shape, drawShape;
     
     public void paint(Graphics g)
     {
@@ -50,24 +40,24 @@ public class VectorSprite
     
     private void wraparound()
     {
-        if (xposition > 900)
+        if (xposition > main.scrWidth)
         {
             xposition = 0;
         }
         
         if (xposition < 0)
         {
-            xposition = 900;
+            xposition = main.scrWidth;
         }
         
-        if (yposition > 600)
+        if (yposition > main.scrHeight)
         {
             yposition = 0;
         }
         
         if (yposition < 0)
         {
-            yposition = 600;
+            yposition = main.scrHeight;
         }
     }
     

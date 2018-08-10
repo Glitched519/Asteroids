@@ -4,64 +4,69 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.Timer;
 import java.util.ArrayList;
-/**
- * Java Retro Asteroids - Lesson 11
- * @author Adrian Balogh
- */
+import java.util.Random;
+
 public class Asteroids extends Applet implements KeyListener, ActionListener
 {
     Image offscreen;
     Graphics offg;
     Spacecraft ship;
+    Timer timer;
     ArrayList<Asteroid> asteroidList;
     ArrayList<Bullet> bulletList;
     ArrayList<Debris> explosionList;
-    Timer timer;
-    boolean upKey, leftKey, rightKey, spaceKey;
-    int score;
-    AudioClip laser, thruster, shipHit, asteroidHit;
-    
-    
-    /**
-     * Initialization method that will be called after the applet is loaded
-     * into the browser.
-     */
-    public void init()
+    boolean upKey, leftKey, rightKey, downKey, spaceKey, gameStart = false, epilepticMode = false;
+    int score, fontSize = 30;
+    AudioClip laser, thruster, shipHit, asteroidHit, backgroundMusic;
+    Font funFont;
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int scrHeight = screenSize.height;
+    int scrWidth = screenSize.width;
+    float red, green, blue;
+    Color flashyLights;
+   
+    @Override
+     public void init()
     {
-        this.setSize(900, 600);
+        this.setSize(scrWidth, scrHeight);
         this.addKeyListener(this);
+        this.setFocusable(true);
         ship = new Spacecraft();
         asteroidList = new ArrayList();
         bulletList = new ArrayList();
         explosionList = new ArrayList();
-        timer = new Timer(20, this);
+        timer = new Timer(17, this);
         offscreen = createImage(this.getWidth(), this.getHeight());
         offg = offscreen.getGraphics();
-        
+        funFont = new Font("Arial", Font.BOLD, fontSize);
         for (int i = 0; i < 6; i++)
         {
             asteroidList.add(new Asteroid());
         }
-        
+        resetLevel();
         laser = getAudioClip(getCodeBase(), "laser80.wav");
         thruster = getAudioClip(getCodeBase(), "thruster.wav");
         shipHit = getAudioClip(getCodeBase(), "explode1.wav");
         asteroidHit = getAudioClip(getCodeBase(), "explode0.wav");
+        backgroundMusic = getAudioClip(getCodeBase(), "Trap_Music.wav");
+        
+        backgroundMusic.loop();
+        
     }
-    
-    
+      
+    @Override
     public void start()
     {
         timer.start();
     }
     
-    
+    @Override
     public void stop()
     {
         timer.stop();
     }
     
-    
+    @Override
     public void actionPerformed(ActionEvent e)
     {
         respawnShip();
@@ -94,8 +99,7 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
         
         checkCollisions();
     }
-    
-    
+       
     public void checkAsteroidDestruction()
     {
         for (int i = 0; i < asteroidList.size(); i++)
@@ -155,7 +159,7 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
             if ( collision(ship, asteroidList.get(i)) && ship.active )
             {
                 ship.hit();
-                score -= 20;
+                score -= Math.PI;
                 rnd = Math.random() * 5 + 5;
                 for (int k = 0; k < rnd; k++)
                 {
@@ -170,7 +174,7 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
                 {
                     bulletList.get(j).active = false;
                     asteroidList.get(i).active = false;
-                    score += 10;
+                    score +=10*bulletList.size()*Math.PI;
                     rnd = Math.random() * 5 + 5;
                     for (int k = 0; k < rnd; k++)
                     {
@@ -182,8 +186,7 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
             }
         }
     }
-    
-    
+       
     public void respawnShip()
     {
         if ( ship.active == false && ship.counter > 50 && isRespawnSafe() 
@@ -200,20 +203,18 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
         
         for (int i = 0; i < asteroidList.size(); i++)
         {
-            x = asteroidList.get(i).xposition - 450;
-            y = asteroidList.get(i).yposition - 300;
+            x = asteroidList.get(i).xposition - scrWidth/2;
+            y = asteroidList.get(i).yposition - scrHeight/2;
             h = Math.sqrt(x*x + y*y);
             
             if (h < 100)
             {
                 return false;
             }
-        }
-        
+        }        
         return true;
     }
-    
-    
+       
     public void fireBullet()
     {
         if ( ship.counter > 5 && ship.active )
@@ -226,50 +227,74 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
         }
     }
     
-    
+    @Override
     public void paint(Graphics g)
-    {
-        offg.setColor(Color.BLACK);
-        offg.fillRect(0, 0, 900, 600);
-        offg.setColor(Color.GREEN);
-        
-        if ( ship.active )
-        {
-            ship.paint(offg);
+    {   
+        Random rdm = new Random();
+        red = rdm.nextFloat();
+        green = rdm.nextFloat();
+        blue = rdm.nextFloat();
+        flashyLights = new Color(red, green, blue);
+        offg.setFont(funFont);
+        if(!gameStart){
+            offg.setColor(Color.BLACK);
+            timer.stop();
+            offg.fillRect(0, 0, scrWidth, scrHeight);
+            offg.setColor(Color.MAGENTA);
+            offg.drawString("Press any key to play.", scrWidth/3, scrHeight/2);
         }
-        
-        for (int i = 0; i < asteroidList.size(); i++)
-        {
-            asteroidList.get(i).paint(offg);
+        if(gameStart){
+            offg.setColor(Color.BLACK);
+            timer.start();
+            offg.fillRect(0, 0, scrWidth, scrHeight);
+            if(epilepticMode){
+                offg.setColor(flashyLights);
+            }else{
+                offg.setColor(Color.GREEN);
+            }
+            if ( ship.active )
+            {
+                ship.paint(offg);
+            }
+
+            for (int i = 0; i < asteroidList.size(); i++)
+            {
+                asteroidList.get(i).paint(offg);
+            }
+
+            for (int i = 0; i < bulletList.size(); i++)
+            {
+                bulletList.get(i).paint(offg);
+            }
+
+            for (int i = 0; i < explosionList.size(); i++)
+            {
+                explosionList.get(i).paint(offg);
+            }
+
+            offg.drawString("Lives: " + ship.lives, 5, fontSize);
+            offg.drawString("Score: " + score, scrWidth-6*fontSize, fontSize);
+
+            if (ship.lives == 0)
+            {
+                offg.drawString("You Died. Your final score is " + score, 380, scrHeight/2);
+                ship.active = false;
+                epilepticMode = true;
+                
+            }
+            else if (asteroidList.isEmpty())
+            {
+                offg.drawString("You Win! Your final score is " + score, 400, scrHeight/2);
+                offg.drawString("Press Ctrl to play again!", 400, scrHeight/2+40);
+                epilepticMode = true;
+                
+            }
         }
-        
-        for (int i = 0; i < bulletList.size(); i++)
-        {
-            bulletList.get(i).paint(offg);
-        }
-        
-        for (int i = 0; i < explosionList.size(); i++)
-        {
-            explosionList.get(i).paint(offg);
-        }
-        
-        offg.drawString("Lives: " + ship.lives, 5, 15);
-        offg.drawString("Score: " + score, 830, 15);
-        
-        if (ship.lives == 0)
-        {
-            offg.drawString("Game Over - You Lose!  Good day, sir!", 380, 300);
-        }
-        else if (asteroidList.isEmpty())
-        {
-            offg.drawString("Game Over - You Win!", 400, 300);
-        }
-        
         g.drawImage(offscreen, 0, 0, this);
         repaint();
     }
     
-    
+    @Override
     public void update(Graphics g)
     {
         paint(g);
@@ -281,6 +306,11 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
         if (upKey)
         {
             ship.accelerate();
+        }
+        
+        if (downKey)
+        {
+            ship.decelerate();
         }
         
         if (leftKey)
@@ -298,57 +328,66 @@ public class Asteroids extends Applet implements KeyListener, ActionListener
            fireBullet();
         }
     }
+    public void resetLevel(){
+        ship.reset();
+        ship.lives = 3;
+        score = 0;
+        gameStart = false;
+        epilepticMode = false;
+        asteroidList.clear();
+        for (int i = 0; i < 6; i++)
+        {
+            asteroidList.add(new Asteroid());
+        }
+        
+    }
     
-    
+    @Override
     public void keyPressed(KeyEvent e)
     {
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT)
-        {
-            rightKey = true;
-        }
-        
-        if (e.getKeyCode() == KeyEvent.VK_LEFT)
-        {
-            leftKey = true;
-        }
-        
-        if (e.getKeyCode() == KeyEvent.VK_UP)
-        {
-            upKey = true;
-            thruster.loop();
-        }
-        
-        if (e.getKeyCode() == KeyEvent.VK_SPACE)
-        {
-            spaceKey = true;
+        gameStart = true;
+        switch(e.getKeyCode()){
+            case KeyEvent.VK_RIGHT:
+                rightKey = true;
+                break;
+            case KeyEvent.VK_LEFT:
+                leftKey = true;
+                break;
+            case KeyEvent.VK_UP:
+                upKey = true;
+                thruster.loop();
+                break;
+            case KeyEvent.VK_DOWN:
+                downKey = true;
+                thruster.loop();
+                break;
+            case KeyEvent.VK_SPACE:
+                spaceKey = true;
+                break;
+            case KeyEvent.VK_CONTROL:
+                resetLevel();
         }
     }
     
-    
+    @Override
     public void keyReleased(KeyEvent e)
     {
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT)
-        {
-            rightKey = false;
-        }
-        
-        if (e.getKeyCode() == KeyEvent.VK_LEFT)
-        {
-            leftKey = false;
-        }
-        
-        if (e.getKeyCode() == KeyEvent.VK_UP)
-        {
-            upKey = false;
-            thruster.stop();
-        }
-        
-        if (e.getKeyCode() == KeyEvent.VK_SPACE)
-        {
-            spaceKey = false;
+        switch(e.getKeyCode()){
+            case KeyEvent.VK_RIGHT:
+                rightKey = false;
+            case KeyEvent.VK_LEFT:
+                leftKey = false;
+            case KeyEvent.VK_UP:
+                upKey = false;
+                thruster.stop();
+            case KeyEvent.VK_DOWN:
+                downKey = false;
+                thruster.stop();
+            case KeyEvent.VK_SPACE:
+                spaceKey = false;
         }
     }
     
-    
+    @Override
     public void keyTyped(KeyEvent e) {}
 }

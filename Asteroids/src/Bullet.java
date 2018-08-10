@@ -5,7 +5,6 @@ import java.awt.Polygon;
  */
 public class Bullet extends VectorSprite
 {
-    
     public Bullet(double x, double y, double a)
     {
         shape = new Polygon();
@@ -25,8 +24,8 @@ public class Bullet extends VectorSprite
         angle = a;
         THRUST = 10;
         
-        xspeed = Math.cos(angle)*THRUST;
-        yspeed = Math.sin(angle)*THRUST;
+        xspeed = Math.cos(angle+Math.random()-0.5)*THRUST;
+        yspeed = Math.sin(angle+Math.random()-0.5)*THRUST;
         
         active = true;
     }
